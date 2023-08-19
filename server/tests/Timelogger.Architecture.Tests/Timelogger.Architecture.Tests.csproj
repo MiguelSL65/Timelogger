@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>Timelogger.Architecture.Tests</AssemblyName>
+        <RootNamespace>Timelogger.Architecture.Tests</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FluentAssertions" Version="6.11.0" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
+      <PackageReference Include="xunit" Version="2.5.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Timelogger.Api\Timelogger.Api.csproj" />
+      <ProjectReference Include="..\..\src\Timelogger.Application\Timelogger.Application.csproj" />
+      <ProjectReference Include="..\..\src\Timelogger.Bootstrap\Timelogger.Bootstrap.csproj" />
+      <ProjectReference Include="..\..\src\Timelogger.Domain\Timelogger.Domain.csproj" />
+      <ProjectReference Include="..\..\src\Timelogger.Infrastructure\Timelogger.Infrastructure.csproj" />
+    </ItemGroup>
+
+</Project>
