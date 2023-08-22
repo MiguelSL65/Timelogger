@@ -1,6 +1,6 @@
 using System;
 
-namespace Timelogger.Application.Projects.Queries.dtos;
+namespace Timelogger.Application.Freelancers.Queries.dtos;
 
 public class GetProjectDto
 {

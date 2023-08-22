@@ -26,4 +26,6 @@ public class Project
         Deadline = deadline;
         IsCompleted = isCompleted;
     }
+
+    public bool CanHaveTimeRegistrations => IsCompleted;
 }

@@ -14,7 +14,7 @@ public class RegisterTimeCommandHandler : IRequestHandler<RegisterTimeCommand>
     private readonly IProjectRepository _projectRepository;
     private readonly IClock _clock;
     
-    private const int MinTimeFrameInMinutesBetweenRequests = 1;
+    private const int MinTimeFrameInSecondsBetweenRequests = 5;
 
     public RegisterTimeCommandHandler(
         IProjectRepository projectRepository,
@@ -26,14 +26,14 @@ public class RegisterTimeCommandHandler : IRequestHandler<RegisterTimeCommand>
 
     public async Task Handle(RegisterTimeCommand request, CancellationToken cancellationToken)
     {
-        await _projectRepository.VerifyIfExistsAsync(request.ProjectId);
+        var project = await _projectRepository.GetProjectByIdAsync(request.ProjectId);
 
-        var lastCreatedAt = await _projectRepository.GetLastInsertedTimeRegistrationDateAsync(request.ProjectId);
-
-        if ((_clock.UtcNow - lastCreatedAt).TotalMinutes <= MinTimeFrameInMinutesBetweenRequests)
+        if (project.CanHaveTimeRegistrations)
         {
-            throw new TimeloggerBusinessException("Cant submit two requests in a row for the same project.");
+            throw new TimeloggerBusinessException("Completed projects can't have new Time Registrations.");
         }
+
+        await ValidateNoDuplicateRequest(request.ProjectId);
 
         var timeRegistration = new TimeRegistration(
             request.ProjectId,
@@ -44,6 +44,16 @@ public class RegisterTimeCommandHandler : IRequestHandler<RegisterTimeCommand>
         timeRegistration.Validate();
 
         await _projectRepository.CreateTimeRegistrationAsync(timeRegistration);
+    }
+
+    private async Task ValidateNoDuplicateRequest(int projectId)
+    {
+        var lastCreatedAt = await _projectRepository.GetLastInsertedTimeRegistrationDateAsync(projectId);
+
+        if ((_clock.UtcNow - lastCreatedAt).TotalSeconds <= MinTimeFrameInSecondsBetweenRequests)
+        {
+            throw new TimeloggerBusinessException("Cant submit two requests in a row for the same project.");
+        }
     }
 }
 

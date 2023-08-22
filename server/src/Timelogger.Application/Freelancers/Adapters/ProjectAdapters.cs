@@ -1,10 +1,10 @@
 using System.Linq;
 using Timelogger.Application.Common;
-using Timelogger.Application.Projects.Queries.dtos;
+using Timelogger.Application.Freelancers.Queries.dtos;
 using Timelogger.Domain;
 using Timelogger.Domain.Crosscutting;
 
-namespace Timelogger.Application.Projects.Adapters;
+namespace Timelogger.Application.Freelancers.Adapters;
 
 public static class ProjectsAdapters
 {

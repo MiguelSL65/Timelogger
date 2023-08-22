@@ -2,11 +2,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Timelogger.Application.Common;
-using Timelogger.Application.Projects.Adapters;
-using Timelogger.Application.Projects.Queries.dtos;
+using Timelogger.Application.Freelancers.Adapters;
+using Timelogger.Application.Freelancers.Queries.dtos;
 using Timelogger.Domain.Repositories;
 
-namespace Timelogger.Application.Projects.Queries;
+namespace Timelogger.Application.Freelancers.Queries;
 
 public class GetProjectsQueryHandler : IRequestHandler<GetProjectsQuery, GetProjectsQueryResponse>
 {

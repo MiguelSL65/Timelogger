@@ -6,7 +6,7 @@ using Timelogger.Domain.Assembly;
 using Timelogger.Infrastructure.Assembly;
 using Xunit;
 
-namespace Architecture.Tests;
+namespace Timelogger.Architecture.Tests;
 
 public class CleanArchitectureTests
 {

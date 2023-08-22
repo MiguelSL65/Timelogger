@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Timelogger.Domain.Exceptions;
 
 namespace Timelogger.Domain;
@@ -37,23 +35,16 @@ public class TimeRegistration
 
     public void Validate()
     {
-        var errors = new List<string>();
-        
-        ShouldBeMoreThanThirtyMinutes(errors);
-        
-        if (errors.Any())
+        if (HasMoreThanThirtyMinutes())
         {
-            throw new TimeloggerBusinessException(errors);
+            throw new TimeloggerBusinessException("Time Registration in a project must be at least 30 minutes long!");
         }
     }
 
-    private void ShouldBeMoreThanThirtyMinutes(ICollection<string> errors)
+    private bool HasMoreThanThirtyMinutes()
     {
         var timeSpentInHours = GetHoursLogged();
 
-        if (timeSpentInHours < HourRationFor30Minutes)
-        {
-            errors.Add("Time Registration in a project must be at least 30 minutes long!");
-        }
+        return timeSpentInHours < HourRationFor30Minutes;
     }
 }

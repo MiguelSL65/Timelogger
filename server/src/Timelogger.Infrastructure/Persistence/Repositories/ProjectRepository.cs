@@ -20,7 +20,7 @@ public class ProjectRepository : IProjectRepository
         _context = context;
     }
 
-    public async Task VerifyIfExistsAsync(int projectId)
+    public async Task<Project> GetProjectByIdAsync(int projectId)
     {
         var projectEntity = await _context
             .Projects
@@ -31,6 +31,14 @@ public class ProjectRepository : IProjectRepository
         {
             throw new EntityNotFoundException(projectId, nameof(Project));
         }
+
+        return new Project(
+            projectEntity.Id,
+            projectEntity.FreelancerId,
+            projectEntity.Name,
+            projectEntity.CompanyName,
+            projectEntity.Deadline,
+            projectEntity.IsCompleted);
     }
 
     public async Task<DateTimeOffset> GetLastInsertedTimeRegistrationDateAsync(int projectId)
@@ -114,5 +122,16 @@ public class ProjectRepository : IProjectRepository
             .ToListAsync();
         
         return new PagedList<Project>(projects, pageNumber, pageSize, totalCount);
+    }
+
+    public async Task CompleteProjectAsync(int projectId)
+    {
+        var project = await _context
+            .Projects
+            .FirstOrDefaultAsync(p => p.Id == projectId);
+
+        project.IsCompleted = true;
+
+        await _context.SaveChangesAsync();
     }
 }

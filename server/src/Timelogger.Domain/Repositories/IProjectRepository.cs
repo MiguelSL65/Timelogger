@@ -7,7 +7,7 @@ namespace Timelogger.Domain.Repositories;
 
 public interface IProjectRepository
 {
-    Task VerifyIfExistsAsync(int projectId);
+    Task<Project> GetProjectByIdAsync(int projectId);
     Task<DateTimeOffset> GetLastInsertedTimeRegistrationDateAsync(int projectId);
     Task CreateTimeRegistrationAsync(TimeRegistration timeRegistration);
     
@@ -20,4 +20,6 @@ public interface IProjectRepository
         int freelancerId,
         int pageNumber,
         int pageSize);
+
+    Task CompleteProjectAsync(int projectId);
 }

@@ -1,6 +1,6 @@
 using MediatR;
 using Moq;
-using Timelogger.Application.Projects.Queries;
+using Timelogger.Application.Freelancers.Queries;
 using Timelogger.Domain;
 using Timelogger.Domain.Crosscutting;
 using Timelogger.Domain.Repositories;
