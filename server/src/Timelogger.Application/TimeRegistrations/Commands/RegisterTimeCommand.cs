@@ -28,12 +28,9 @@ public class RegisterTimeCommandHandler : IRequestHandler<RegisterTimeCommand>
     {
         var project = await _projectRepository.GetProjectByIdAsync(request.ProjectId);
 
-        if (project.CantHaveTimeRegistrations)
-        {
-            throw new TimeloggerBusinessException("Completed projects can't have new Time Registrations.");
-        }
+        project.ValidateCanAddTimeRegistration();
 
-        await ValidateNoDuplicateRequest(request.ProjectId);
+        EnsureSufficientTimeSinceLastRequest(project.TimeRegistrationLastInsertedAt);
 
         var timeRegistration = new TimeRegistration(
             request.ProjectId,
@@ -46,13 +43,16 @@ public class RegisterTimeCommandHandler : IRequestHandler<RegisterTimeCommand>
         await _projectRepository.CreateTimeRegistrationAsync(timeRegistration);
     }
 
-    private async Task ValidateNoDuplicateRequest(int projectId)
+    private void EnsureSufficientTimeSinceLastRequest(DateTimeOffset? lastCreatedAt)
     {
-        var lastCreatedAt = await _projectRepository.GetLastInsertedTimeRegistrationDateAsync(projectId);
-
-        if ((_clock.UtcNow - lastCreatedAt).TotalSeconds <= MinTimeFrameInSecondsBetweenRequests)
+        if (!lastCreatedAt.HasValue)
         {
-            throw new TimeloggerBusinessException("Cant submit two requests in a row for the same project.");
+            return;
+        }
+
+        if ((_clock.UtcNow - lastCreatedAt.Value).TotalSeconds <= MinTimeFrameInSecondsBetweenRequests)
+        {
+            throw new TimeloggerBusinessException("Cant submit two time registration requests in a row for the same project.");
         }
     }
 }

@@ -22,33 +22,35 @@ public class ProjectRepository : IProjectRepository
 
     public async Task<Project> GetProjectByIdAsync(int projectId)
     {
-        var projectEntity = await _context
+        var queryResult = await _context
             .Projects
+            .Where(p => p.Id == projectId)
+            .Select(p => new
+            {
+                Project = p,
+                TimeRegistrationLastInsertedAt = _context
+                    .TimeRegistrations
+                    .Where(t => t.ProjectId == p.Id)
+                    .OrderByDescending(t => t.CreatedAtUct)
+                    .Select(t => t.CreatedAtUct)
+                    .FirstOrDefault()
+            })
             .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Id == projectId);
+            .FirstOrDefaultAsync();
 
-        if (projectEntity == null)
+        if (queryResult == null)
         {
             throw new EntityNotFoundException(projectId, nameof(Project));
         }
 
-        return new Project(
-            projectEntity.Id,
-            projectEntity.FreelancerId,
-            projectEntity.Name,
-            projectEntity.CompanyName,
-            projectEntity.Deadline,
-            projectEntity.IsCompleted);
-    }
-
-    public async Task<DateTimeOffset> GetLastInsertedTimeRegistrationDateAsync(int projectId)
-    {
-        return await _context
-            .TimeRegistrations
-            .AsNoTracking()
-            .Where(tr => tr.ProjectId == projectId)
-            .Select(tr => tr.CreatedAtUct)
-            .LastOrDefaultAsync();
+        return Project.Create(
+            queryResult.Project.Id,
+            queryResult.Project.FreelancerId,
+            queryResult.Project.Name,
+            queryResult.Project.CompanyName,
+            queryResult.Project.Deadline,
+            queryResult.Project.IsCompleted,
+            queryResult.TimeRegistrationLastInsertedAt);
     }
 
     public async Task CreateTimeRegistrationAsync(TimeRegistration timeRegistration)
@@ -106,7 +108,7 @@ public class ProjectRepository : IProjectRepository
             .AsNoTracking()
             .Where(p => p.FreelancerId == freelancerId)
             .OrderBy(p => p.Deadline)
-            .Select(p => new Project(
+            .Select(p => Project.Create(
                 p.Id,
                 p.FreelancerId,
                 p.Name,

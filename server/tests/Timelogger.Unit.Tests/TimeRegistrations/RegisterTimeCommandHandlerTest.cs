@@ -29,10 +29,9 @@ public class RegisterTimeCommandHandlerTest
     public async Task Handle_ValidTimeRegistry_WhenProjectExists_ShouldBeSuccessful()
     {
         // Arrange
-        var lastInsertedTimeRegistration = new DateTimeOffset(2023, 08, 19, 16, 30, 00, TimeSpan.Zero);
         var now = new DateTimeOffset(2023, 08, 19, 17, 00, 00, TimeSpan.Zero);
         
-        var project = new Project(
+        var project = Project.Create(
             id: 1,
             freelancerId: 1,
             name: "GTA6",
@@ -55,10 +54,6 @@ public class RegisterTimeCommandHandlerTest
             .Returns(now);
 
         _projectRepositoryMock
-            .Setup(p => p.GetLastInsertedTimeRegistrationDateAsync(It.IsAny<int>()))
-            .ReturnsAsync(lastInsertedTimeRegistration);
-
-        _projectRepositoryMock
             .Setup(p => p.CreateTimeRegistrationAsync(It.IsAny<TimeRegistration>()));
 
         // Act
@@ -72,10 +67,7 @@ public class RegisterTimeCommandHandlerTest
             .Verify(p => p.GetProjectByIdAsync(It.IsAny<int>()), Times.Once);
         
         _clockMock
-            .Verify(c => c.UtcNow, Times.Once);
-        
-        _projectRepositoryMock
-            .Verify(p => p.GetLastInsertedTimeRegistrationDateAsync(It.IsAny<int>()), Times.Once);
+            .Verify(c => c.UtcNow, Times.Never);
         
         _projectRepositoryMock
             .Verify(p => p.CreateTimeRegistrationAsync(It.IsAny<TimeRegistration>()), Times.Once);
@@ -112,27 +104,25 @@ public class RegisterTimeCommandHandlerTest
             .Verify(c => c.UtcNow, Times.Never);
         
         _projectRepositoryMock
-            .Verify(p => p.GetLastInsertedTimeRegistrationDateAsync(It.IsAny<int>()), Times.Never);
-        
-        _projectRepositoryMock
             .Verify(p => p.CreateTimeRegistrationAsync(It.IsAny<TimeRegistration>()), Times.Never);
     }
     
     [Fact]
-    public async Task Handle_ValidTimeRegistry_WhenAnotherRequestWasMadeLessThanOneMinuteAgo_ShouldThrow()
+    public async Task Handle_ValidTimeRegistry_WhenAnotherRequestWasMadeLessThan5SecondsAgo_ShouldThrow()
     {
         // Arrange
-        var lastInsertedTimeRegistration = new DateTimeOffset(2023, 08, 19, 16, 30, 00, TimeSpan.Zero);
-        var now = new DateTimeOffset(2023, 08, 19, 16, 30, 45, TimeSpan.Zero);
-        const string expectedErrorMessage = "Cant submit two requests in a row for the same project.";
+        var lastInsertedTimeRegistrationDate = new DateTimeOffset(2023, 08, 19, 16, 30, 30, TimeSpan.Zero);
+        var now = new DateTimeOffset(2023, 08, 19, 16, 30, 34, TimeSpan.Zero);
+        const string expectedErrorMessage = "Cant submit two time registration requests in a row for the same project.";
         
-        var project = new Project(
+        var project = Project.Create(
             id: 1,
             freelancerId: 1,
             name: "GTA6",
             companyName: "Rockstar",
             deadline: DateTimeOffset.UtcNow,
-            isCompleted: false);
+            isCompleted: false,
+            timeRegistrationLastInsertedAt: lastInsertedTimeRegistrationDate);
         
         var commandRequest = new RegisterTimeCommand(
             projectId: 1,
@@ -148,10 +138,6 @@ public class RegisterTimeCommandHandlerTest
             .Setup(c => c.UtcNow)
             .Returns(now);
 
-        _projectRepositoryMock
-            .Setup(p => p.GetLastInsertedTimeRegistrationDateAsync(It.IsAny<int>()))
-            .ReturnsAsync(lastInsertedTimeRegistration);
-
         // Act
         async Task Action() => await _sut.Handle(commandRequest, new CancellationToken());
 
@@ -167,9 +153,6 @@ public class RegisterTimeCommandHandlerTest
             .Verify(c => c.UtcNow, Times.Once);
         
         _projectRepositoryMock
-            .Verify(p => p.GetLastInsertedTimeRegistrationDateAsync(It.IsAny<int>()), Times.Once);
-        
-        _projectRepositoryMock
             .Verify(p => p.CreateTimeRegistrationAsync(It.IsAny<TimeRegistration>()), Times.Never);
     }
     
@@ -177,17 +160,18 @@ public class RegisterTimeCommandHandlerTest
     public async Task Handle_TimeRegistryWithLessThan30Min_ShouldThrow()
     {
         // Arrange
-        var lastInsertedTimeRegistration = new DateTimeOffset(2023, 08, 19, 16, 30, 00, TimeSpan.Zero);
+        var lastInsertedTimeRegistrationDate = new DateTimeOffset(2023, 08, 19, 16, 30, 00, TimeSpan.Zero);
         var now = new DateTimeOffset(2023, 08, 19, 18, 30, 45, TimeSpan.Zero);
         const string expectedErrorMessage = "Time Registration in a project must be at least 30 minutes long!";
 
-        var project = new Project(
+        var project = Project.Create(
             id: 1,
             freelancerId: 1,
             name: "GTA6",
             companyName: "Rockstar",
             deadline: DateTimeOffset.UtcNow,
-            isCompleted: false);
+            isCompleted: false,
+            timeRegistrationLastInsertedAt: lastInsertedTimeRegistrationDate);
         
         var commandRequest = new RegisterTimeCommand(
             projectId: 1,
@@ -203,10 +187,6 @@ public class RegisterTimeCommandHandlerTest
             .Setup(c => c.UtcNow)
             .Returns(now);
 
-        _projectRepositoryMock
-            .Setup(p => p.GetLastInsertedTimeRegistrationDateAsync(It.IsAny<int>()))
-            .ReturnsAsync(lastInsertedTimeRegistration);
-
         // Act
         async Task Action() => await _sut.Handle(commandRequest, new CancellationToken());
 
@@ -222,9 +202,6 @@ public class RegisterTimeCommandHandlerTest
             .Verify(c => c.UtcNow, Times.Once);
         
         _projectRepositoryMock
-            .Verify(p => p.GetLastInsertedTimeRegistrationDateAsync(It.IsAny<int>()), Times.Once);
-        
-        _projectRepositoryMock
             .Verify(p => p.CreateTimeRegistrationAsync(It.IsAny<TimeRegistration>()), Times.Never);
     }
     
@@ -234,7 +211,7 @@ public class RegisterTimeCommandHandlerTest
         // Arrange
         const string expectedErrorMessage = "Completed projects can't have new Time Registrations.";
 
-        var project = new Project(
+        var project = Project.Create(
             id: 1,
             freelancerId: 1,
             name: "GTA6",
@@ -265,9 +242,6 @@ public class RegisterTimeCommandHandlerTest
         
         _clockMock
             .Verify(c => c.UtcNow, Times.Never);
-        
-        _projectRepositoryMock
-            .Verify(p => p.GetLastInsertedTimeRegistrationDateAsync(It.IsAny<int>()), Times.Never);
         
         _projectRepositoryMock
             .Verify(p => p.CreateTimeRegistrationAsync(It.IsAny<TimeRegistration>()), Times.Never);

@@ -27,27 +27,30 @@ public class GetProjectsQueryHandlerTest
         var expectedProjects = new PagedList<Project>(
             items: new List<Project>
             {
-                new (
+                Project.Create(
                     id: 1,
                     freelancerId: 1,
                     name: "GTA6",
                     companyName: "Rockstar",
                     deadline: new DateTimeOffset(2023, 08, 19, 16, 30, 00, TimeSpan.Zero),
-                    isCompleted: false),
-                new (
+                    isCompleted: false,
+                    timeRegistrationLastInsertedAt: new DateTimeOffset(2023, 08, 19, 16, 30, 00, TimeSpan.Zero)),
+                Project.Create(
                     id: 1,
                     freelancerId: 1,
                     name: "Accounting Software",
                     companyName: "e-conomic",
                     deadline: new DateTimeOffset(2023, 09, 19, 16, 30, 00, TimeSpan.Zero),
-                    isCompleted: false),
-                new (
+                    isCompleted: false,
+                    timeRegistrationLastInsertedAt: new DateTimeOffset(2023, 08, 19, 16, 30, 00, TimeSpan.Zero)),
+                Project.Create(
                     id: 1,
                     freelancerId: 1,
                     name: "Food Delivery App",
                     companyName: "e-conomic",
                     deadline: new DateTimeOffset(2023, 10, 19, 16, 30, 00, TimeSpan.Zero),
-                    isCompleted: false)
+                    isCompleted: false,
+                    timeRegistrationLastInsertedAt: new DateTimeOffset(2023, 08, 19, 16, 30, 00, TimeSpan.Zero))
             },
             pageNumber: 1,
             pageSize: 10,
