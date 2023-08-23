@@ -6,7 +6,7 @@ using Timelogger.Domain.Crosscutting;
 using Timelogger.Domain.Repositories;
 using Xunit;
 
-namespace Timelogger.Unit.Tests.Projects;
+namespace Timelogger.Unit.Tests.Freelancers;
 
 public class GetProjectsQueryHandlerTest
 {

@@ -28,7 +28,7 @@ public class RegisterTimeCommandHandler : IRequestHandler<RegisterTimeCommand>
     {
         var project = await _projectRepository.GetProjectByIdAsync(request.ProjectId);
 
-        if (project.CanHaveTimeRegistrations)
+        if (project.CantHaveTimeRegistrations)
         {
             throw new TimeloggerBusinessException("Completed projects can't have new Time Registrations.");
         }

@@ -27,5 +27,5 @@ public class Project
         IsCompleted = isCompleted;
     }
 
-    public bool CanHaveTimeRegistrations => IsCompleted;
+    public bool CantHaveTimeRegistrations => IsCompleted;
 }
